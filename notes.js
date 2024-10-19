@@ -25,3 +25,23 @@
 // Now this image can run to create a container.
 
 const PULL_NODE_IMAGE = "docker pull node";
+
+// start and stop container -> For whis we name image name or ID of image
+const DOCKER_IMAGES = "docker images";
+const DOCKER_RUN =
+  "docker run --name addNameForContainer d377bb5afeef or nameOfImage";
+
+const DOCKER_PS = "docker ps";
+const DOCKER_PS_ALL = "docker ps -a";
+const DOCKER_STOP = "docker stop containerName or containerId";
+
+// MAP Host port to docker ie. publish
+const DOCKER_RUN_WITH_PORT_MAP =
+  "docker run --name containerName -p 4000:4000 -d nameOfImage";
+
+// NOTE: docker run runs an image to start a container but docker start run a container and docker start does not need PORT mapping configurations
+const DOCKER_START = "docker start containerIdName";
+
+// Layers caching -> Docker cache image at each layer
+// Dockerfile each line add a new Layer in image and combination of layers makes an image
+// NOTE: If on layer there is change then lines below it are going to rerun

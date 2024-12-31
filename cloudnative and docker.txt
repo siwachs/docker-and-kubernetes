@@ -1,0 +1,176 @@
+Docker, Container and Docker Compose
+Docker Registry
+
+Kubernetes -> Pods, Workloads, Services, Updates, Storage, App Settings, Observablity, Scaling
+
+Microservices Architecture -> is an approach to software development that structures an application as a collection of loosely coupled, independently deployable services, which are modeled around business domains. This architecture contrasts with the traditional monolithic style, where all components are tightly integrated into a single codebase and are often deployed as one unit.
+And Each Service can scale independently.
+
+From monolithic to Microservices.
+Break applications into smaller systems.
+
+Anti pattern in Microservices
+Drawbacks are
+1) Risk of over complexity
+2) Risk that changes impact numerous services
+3) Risk to secure each Microservices
+
+So with that we need -> DevOps, CICD, Testing
+
+
+
+Benefits.
+1) Improve fault tolerance
+2) Run most on open source so less vendo lock in
+3) Easy to understand
+4) Smaller and faster deployment
+5) Easy to Deploy
+
+Drawbacks.
+1) Complexity is added
+2) Testing whole systems
+3) Deployment may be simpler but they can affect other Microservices
+4) Multiple Databses
+5) Call to multiple Microservices (Latency Issue)
+6) Add retry mechanism on API calls
+7) Multiple Point of Fail
+8) Security -> Each Service can access and talk to each other
+
+
+Cloud Native!
+Cloud-native refers to a set of practices and design patterns for building and running applications that are optimized for cloud environments. The primary goal of cloud-native development is to fully leverage the capabilities of cloud platforms, including scalability, flexibility, resilience, and resource efficiency. Cloud-native applications are designed to be deployed and operated in cloud environments, rather than being migrated from traditional on-premise infrastructures.
+They use Containers, Services Mesh, Microservices, Immutable infrastructures (Means we never update but replace it with newer thing) and Declarative APIs.
+
+
+Cloud Native application architecture
+
+Clean Code -> Domain Drive Design -> Microservices Principals -> Kubernetes Patterns
+
+With this
+1) Infrastructures became immutable and disposable
+2) Provisioned in minutes and destroyed on demand
+3) Never updated or repaired but re-provisioned
+
+Cloud Native Trail Map (CNCF website)
+1) Containerization -> Deploy and Moniter
+2) CI/CD -> Change in Code reflect to containers
+3) Kubernetes -> Deployment
+4) Observablity and Analysis
+5) Service Proxy, Discovery and MESH -> For Health Check
+6) network and Security Policy
+
+
+
+Containers
+A unit of software/deployment having Code, Runtime, System Tools and System Libraries.
+It is faster to deploy because they are smaller
+Use Fer Resources
+Faster, Portable and Insolated to each other
+
+What is Virtualized?
+It run on a HW where a OS is installed the hyperviser let you create a VM. Basically VM virtualized the HW and resource intensive. (Large, Slow to boot, Ideal for long running tasks)
+
+Container -> It use OS Kernal don't have its own kernal and don't need to BOOT like VM. (Lightweight, Quick to start, Portable and Ideal for short lived tasks)
+And continer are Made of Layers.
+The layers can be -> Base OS -> Customization -> Application
+
+Docker use Local cache to cache layers.
+
+
+Container Registry -> A centralized Repo to host docker images (DockerHub)
+
+
+
+Orchestrator -> It help use manage, scale, moniter the containers we run on server. Example: Kubernetes
+
+What is Docker?
+It provide a continer runtime, CLI to create and manage continers, Dockerfile format for building container images.
+
+
+Docker Commands:
+docker info
+docker version
+docker login                          Login to DockerHub
+
+docker pull [image name]
+docker run [image name]               Run a image if not present pull it
+docker run -d [image name]            Detached Mode
+docker start [container name]
+docker ps                             List running containers
+docker ps -a                          List all containers (That are in memory)
+docker stop [container name]          Stop but remain in memory
+docker stop $(docker ps -q)           Stop all running container
+docker kill [container name]          Release from memory
+docker image inspect [image name]     Get Image Info
+docker rm [container name]            Remove container from memory
+docker container exec -it [container name] bash          Attach shell to running container
+
+docker rm $(docker ps -a -q)                             Remove all images
+docker images
+docker rmi [image name]                                  Remove a image
+
+docker container prune                                   Remove containers
+docker system prune -a                                   Remove every images
+
+
+
+
+Build a Docker Image:
+docker build -t  [name:tag] .
+docker build -t  [name:tag] -f [file]
+
+Dockerfile -> It tell steps to build a image.
+.dockerignore -> It is list of files not to deploy on container.
+
+
+Data Persistence in Containers:
+They don't store data containers are stateless. If a container crash the data we write on it is lost.
+For Persist data we need to do it outside the container called volume.
+A volume map a logical folder to a container. (ie we can map a local folder to docker container)
+
+docker create volume [volumeName]
+docker volume ls                     List the volumes
+docker volume inspect [volumeName]
+docker volume rm [volumeName]
+docker volume prume                  Remove all the non used volumes
+
+docker run -d --name devtest -v volumeName:/app ngnix:latest
+
+
+
+
+Docker Compose
+
+YAML is default format use by docker compose and kubernetes. (YAML Lint tool can validate a YAML file)
+
+Docker compose use to define and run multi container apps using YAML file.
+
+docker compose (v2 comes with docker cli)
+docker-compose (is use in v1 and need python also need a seperate installation)
+
+
+1) This use for Workloads that don't require full Orchestrator
+2) Easy for development and testing
+
+docker compose build                   Build images
+docker compose start                   Start containers
+docker compose stop
+docker compose up -d                   Build and Start
+docker compose ps                      List running container
+docker compose rm                      Remove from memory
+docker compose down                    Stop and Remove
+docker compose logs
+docker compose exec -it [containerName] bash
+
+
+Copy from/to container
+
+docker compose cp [containerId]:[SRC_PATH] [DEST_PATH]           Copy from container
+docker compose cp [SRC_PATH] [containerId]:[DEST_PATH]           Copy to container
+
+
+Docker compose features
+1) Resource Limits
+2) Env Variables
+3) Networking -> All container can communicate with each other using there service name or hostname
+4) Dependency -> With depend on we first run a continer x first then resume other Containers

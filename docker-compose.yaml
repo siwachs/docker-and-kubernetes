@@ -1,5 +1,5 @@
 services:
-  api:
+  api: # Service Name/Hostname
     build: ./api
     container_name: api_container
     ports:
@@ -16,4 +16,4 @@ services:
       - ./frontend:/app
       - /app/node_modules
     stdin_open: true
-    tty: true # Bot Properties run the container in interactive mode for react apps like detached mode
+    tty: true # Both Properties run the container in interactive mode for react apps like detached mode

@@ -1,0 +1,256 @@
+It is container orchesration tool (manage lifecycle of a container ie take care of deployments, scaling, health checks).
+Design as loosely coupled collection of components centered around deploing, maintaining and scaling workloads.
+Runs on all cloud platforms.
+
+It can do:
+1) Service discovery and load balancing
+2) Storage orchesration (Local or Cloud based)
+3) Automated rollouts and rollbacks
+4) Self Healing
+5) Secret and Configration managment
+6) Use smae API across on-premise and ever cloud providers
+
+It can't do:
+1) Does not Deploy source coupled
+2) Can not build application
+3) Does not provide app lever services: Mesage buses, databases, caches etc
+
+Kubernetes consist of Master Node aka control plane.
+And it runs Kubernetes controllers and services.
+And we have worker nodes that runs and deplo the containers we deploy in a cluster.
+
+A container runs in a Pod and a Pod runs in a Node and all the nodes form a cluster.
+
+
+
+Run Kubernetes locally:
+Require vitualiztion -> Docker Desktop, MicroK8s, Minikube, Kind
+
+And Docker desktop limits to one node and MicroK8s, MicroK8s, Kind can emulate multiple worker nodes.
+
+
+On windows we can run both windows and linux containers.
+So on windows Enable Hyper-V and on Docker Desktop enable Kubernetes.
+And a recommended way is On Docker Desktop's general tab enable use the WSL 2 based engine.
+
+kubectl cluster-info
+
+
+
+K8 CLI
+Kubernetes master has a kube-apiserver a REST api which can use to commubicate Kubernetes.
+Define a desired state in YAML file. Example run X number of instances in a cluster.
+
+use kubectl command.
+
+K8s Context
+A group of access parameters to a K8s cluster
+It contains a Kubernetes cluster, a user and namespace
+Current context is the cluster that is currentl the default for kubectl.
+All kubectl commands run against that cluster.
+
+kubectl config current-context
+kubectl config get-contexts
+kubectl config use-context [contextName]
+kubectl config rename-context [oldName] [newName]
+kubectl config delete-context [contextName]
+
+
+also kubectl config .... this can be replace with kubectx commands.
+
+
+Create Resources in Kubernetes (The Declarative and Imperative Way)
+In Imperative we use kubectl commands to create Resources in cluster.
+
+Declarative way we use kubectl and YAML file. (Reproducable, Repeatable, Can be store in source code)
+
+Nginx container using both methods.
+
+## Imperative
+
+    kubectl create deployment mynginx1 --image=nginx
+
+## Declarative
+
+    kubectl create -f deploy-example.yaml
+
+## Cleanup
+
+    kubectl delete deployment mynginx1
+    kubectl delete deploy mynginx2
+
+The YAML file contain propertiest that define the resources
+Required Properties in this are apiVersion, Kind, metadata.name, metadata.namespace, spec (desired state)
+
+
+Namespaces
+Allow to group resources
+Ex: Dev, Test, Prod
+
+K8s default workspace
+Objects in one namespace can access Objects in a different one
+Ex: objectname.prod.svc.cluster.local
+
+Deleta a namespace will delete all child objectname
+
+
+
+Nodes (Master node)
+Nodes are physical or VM and together they fomr cluster.
+Master Node are called control plane (And application containers not run on that node it can be but not recommended)
+
+And in it etcd is a Key Value Database for cluster state data and kube-api server is component to communicate with etcd.
+
+kube-api
+1) REST
+2) Save state to datastore
+3) All client interact with it, but never directly to Datastore
+
+etcd
+Act as cluste datastore for storing stae 
+KV store
+Not a DB for app to use
+Single source of truth
+
+kube-controller-manager controlls every controllers
+It runs Node controller, Replication controller, Endpoints controller, Service account and Token controllers.
+
+cloud-control-manager
+Interact with cloud provider (check if node created or deleted, route, provide load balancers and mounting volumes)
+
+kube-scheduler
+watches newly created pods that have no node assigned and select a node for them to run on
+
+Addons DNS, Web UI (dashboard), Cluster-level logging, Container resource monitoring
+
+Worker Node
+Node is a physical or VM. Group of nodes make a cluster and a master node is called control plane (where Kubernetes sevices installed).
+
+Worker node is where container runs.
+When a worker node add to cluster it install kube-proxy, kubeler and container runtime to run pods.
+
+kublet
+Manage pod's lifecycle
+ensure containers in Pod specs are running and healthy
+
+kube-proxy (all trafic goes through it)
+manage network rules on nodes
+
+container runtime (k8s v1.19+) does not have this
+Now we no longer access Docker engine inside cluster
+use crictl instead to exec command in cluster
+
+
+Node Pool
+Is a group VM, all of same size
+A cluster can have multiplenode polls
+
+Docker Desktop is limit to 1 node (So master and application runs on same node)
+
+kubectl get nodes
+## Get nodes information
+
+Get a list of all the installed nodes. Using Docker Desktop, there should be only one.
+
+    kubectl get nodes
+
+Get some info about the node.
+
+    kubectl describe node
+
+
+Pods
+Atomic uinit of smallest unit of work of k8s
+Encapsulate an application's container
+Represent a unit of deployment
+It can run one or more container
+Containers within a pod share: Ip address space, mounted volumes
+And containers communicate each other via Localhost
+
+Deploying a pod is Atomic operation, it succeed or not
+If a pod fails it replace with new IP
+We don't update a pod we replace it with updated version
+We scale by adding more pods, not more containers in a pod
+
+
+Pod -> can have multiple containers and one in it is Main Worker (where app logic resides) and other are helpers.
+
+Pod lifecycle:
+Create using kubectl create
+
+CLI -> API Server -> etcd -> scheduler (watches thse info look at the nodes and find one where pod go) -> kubelet watch for that information -> And issue a command to create that instance of a pod -> and that information write into etcd
+
+
+Pod state
+Tell high level summary of where Pod is in a lifecycle
+
+Pending -> Accepted but not created
+Running -> Bound to node
+Succeeded -> Exited with status 0
+Failed -> All containers exit and at least one exited with non-zero status
+Unknow -> commubication issue with Pod
+CrashLoopBackff -> Start, Creashed, start again and crashed again
+
+
+
+Init Containers (Deployment)
+App depend on DB, APIs, Files we want to validate but don't want to clutter it with infrastructure code.
+We can init a Pod before it an application container runs.
+In Pod defination we define a init container that runs first in Pod after that we start App container.
+Each init container runs successfully before next one starts.
+
+
+
+Labels -> KV pairs used to identify, describe and group related sets of objects or resources.
+metadata:
+  name: myapp-pod
+  labels:
+    app: myapp
+    type: front-end
+
+Selectors
+Use labels to filter or select objects.
+Now we can use those selctors to run Pods on secify nodes ie we can tell run Label X on Node A and Label Y on Node B.
+
+
+Multi Containers Pods
+Pods run one or more containers (Most Common scenario: Helper process)
+Ex: Set data to DBo or wire log file
+
+1) Sidecar Pattern
+Pod -> App (write logs) and Sidecar can copy the log file to persistend storage.
+With this the App code of main worker is not clutter by infrastructure code.
+
+2) Adapter Pattern
+Pod -> App (write complex monitoring output that modern service of Cloud provider does not understand) -> Adapter simplify the data for Service
+
+3) Ambassador Pattern
+Pod -> App (Need to persist data to DB but app don't known how to do it) -> Send it to Ambassador to write on DB to write on DB (write Data to NoSQL the code present outside the data container)
+
+Networking
+All containers within pod can communicate with each other
+All pods can communicate each other
+All nodes can communicate with all pods
+Pods are given IP address (ephemeral)
+Services are given persistent IP
+
+
+Container in Pods have same IP address but must have different PORT number and containers have shared Volume.
+For External acess to cluster trafic goes to a External service called Load balancer (Cloud Provider Service)
+
+
+
+
+
+
+Workload
+It is a application runs on Kubernetes.
+All containers runs on cluster must run on a workload.
+Pod -> Represent set of running containers.
+
+All workload create Pod.
+And ReplicaSet and Deployment provide extra function to a Pod.
+And StatefulSet and DeamonSet )Provide Storage driver 
+
+Tasks that runs to completion
+Job CronJob

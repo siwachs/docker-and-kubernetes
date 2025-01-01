@@ -174,3 +174,18 @@ Docker compose features
 2) Env Variables
 3) Networking -> All container can communicate with each other using there service name or hostname
 4) Dependency -> With depend on we first run a continer x first then resume other Containers
+
+
+
+Container Registries
+
+A repo for container images
+Provide by DockerHub, Microsoft, AWS and Google
+
+
+Publish to DockerHub (use organisation name in it ks8 is organization)
+
+1) docker login -u <username> -p <password>
+2) docker tag imageName ks8/image:latest
+3) docker push ks8/image:latest
+4) docker pull ks8/image:latest

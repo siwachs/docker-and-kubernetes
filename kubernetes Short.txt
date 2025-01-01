@@ -1,0 +1,55 @@
+Let say a JS code.
+
+Deploy -> Need a Server(Have a static IP) (Phsical) Up 24/7.
+In a deployment we need consistency, secure and Highly available.
+ie same evelopment Env and Prod Env.
+
+Let sa -> JS use Postgress, Reddis (replicaate same on Server ie Reddis v6 and Postgress v14) and then run on it.
+
+And finally Map to a Domain.
+
+
+(Not it can't be scale) Let say it run on 2vCPU and 4GB RAM we have to do vertical scale.
+
+
+
+Now AWS comes in this.
+Which Introduce CloudNative Technologies.
+And this provide Redis, Postgress, Elastic Load Balancer, Clodfront CDN etc. as cloud services
+
+And Now Scaling is on AWS side we just have to define Auto Scale Group (ASG) with policy.
+
+
+
+
+
+Now still a Problem let say we are using Redis 6, PG 14 etc they still need to configure on AWS.
+
+Solution: Virtualization (VM) (Have own OS) Put code in it and Deplo it.
+But they are very heavy and not easy to scale.
+
+So, We now have containerization. In it we have No OS. We use Host machine's Kernal (It kind of a virtualization but ver light weight). And each image have same behaviour on every machine.
+
+
+
+
+Now Google
+The have container of Gmail, Photos, Drive
+
+And manage of container is hard.
+Let say a container Gmail -> Run Gmail and Application Run when this run to scale we have to run more containers and now traffic decrese we have to delete extra containers.
+
+Now let say during Scale Up a container crash (we need to replace that). Also Collect Logs of these containers.
+
+We have:
+1) Container Run/Stop/Healthcheck
+2) Container Moniter
+3) Container Logs (Log aggregation)
+3) Restart on crash
+
+
+
+Kubernetes, also known as K8s, is an open source system for automating deployment, scaling, and management of containerized applications. ie it is a container orchestration tool.
+
+
+

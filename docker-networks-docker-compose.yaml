@@ -3,6 +3,7 @@ version: "3.8"
 services:
   web:
     image: nginx:latest
+    restart: always # Restart a container untill it removes or restart on fail
     container_name: web
     ports:
       - "8080:80" # Expose port 8080 on the host, mapping to port 80 inside the container

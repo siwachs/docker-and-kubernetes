@@ -50,6 +50,124 @@ We have:
 
 
 Kubernetes, also known as K8s, is an open source system for automating deployment, scaling, and management of containerized applications. ie it is a container orchestration tool.
+It groups containers that make up an application into logical units for easy management and discovery.
+
+
+Docker -> Containerization
+Deploy it on AWS ECS (Elastic Container Service)
+Create image and send it to ECS. It auto deploy, scale and manage that image like Kubernetes.
+Now in here we write code and config like CI/CD pipelines write on base of AWS ECS ie (Vendor Lock In)
+And migration became hard.
+
+But Kubernetes is not cloud dependent (Works on every cloud platform and even on local machine).
+So easy to migrate.
+
+
+Kubernetes Architecture.
+
+Kubernetes have a 
+Physical Machine (Control Plane ie Admin) Inside it we have
+API Sever, Controller (Kube controller), etcd KV store, Scheduler
+
+And Now instruction ie Deployment and Config goes to API Server
+And API server connect to Controller which execute the instructions.
+
+And this controller store logs in etcd KV store.
+
+
+And Now Other Component is Worker Node (Physical Machine). We can have multiple Worker Node.
+
+Inside it we have a
+Kubelet, Kube Proxy and Contanier Runtime Interface (Inside it we have Pods)
+And our actual Workload is run inside Container Runtime Interface
+
+And Kubelet is connected to  Conrol Plane's API Server.
+
+                       +------------------------------+
+                       |       Master Node (Control   |
+                       |           Plane)              |
+                       |                              |
+                       |  +------------------------+  |
+                       |  |   API Server           |  |
+                       |  +------------------------+  |
+                       |  |   Kube Controller      |  |
+                       |  +------------------------+  |
+                       |  |   etcd (KV Store)      |  |
+                       |  +------------------------+  |
+                       |  |   Scheduler            |  |
+                       |  +------------------------+  |
+                       +------------|-----------------+
+                                    |
+                                    |
+                                    v
+                       +-------------------------------+
+                       |      Worker Node              |
+                       |  (Physical Machine)           |
+                       |                               |
+                       |  +-------------------------+  |
+                       |  |     Kubelet             |  |
+                       |  +-------------------------+  |
+                       |  |     Kube Proxy          |  |
+                       |  +-------------------------+  |
+                       |  | Container Runtime (CRI)  |  |
+                       |  +-------------------------+  |
+                       |  |   Pod Containers         |  |
+                       |  +-------------------------+  |
+                       +-------------------------------+
+                              |
+                              |  (Worker Node communicates
+                              |   with API Server of Master Node)
+                              v
+                      +----------------------------+
+                      |    Master API Server       |
+                      +----------------------------+
+
+
+Now Let say Start two container for Nginx (Config File YAML)
+1) Goes to API server
+2) Then it Goes to Controller It create a Pod -> Pod 1 and Pod 2 (of Nginx)
+3) Created Not running they need a physical machine to run
+4) Now Scheduler comes and Place those Pods's into Worker Node (Scheduler watch for Pods which not assigned to any worker node it assigned a worker node to that Pod) ie it do Best Fit of Pod in distributed manner
+
+How it do? Scheduler use Kubelet to do that task throug API Server to run a container on that Worker Node.
+And Kubelet also can delete that container.
+
+ie the Kubelet has task for communication.
+
+
+Kube Proxy
+It provide networking and traffic rules to worker node.
+
+ie We use a Load Balancer and a user Visit application they do it through Kube Proxy.
+Kube Proxy redirect the trafice to the specefic Pods.
 
 
 
+Now let say we need 5 containers
+Then API server looks into etcd and get to known that currently 2 containers are running.
+And our desired state is 5. ie we need 3 more containers.
+
+We create 3 Pods.
+Desired - 5
+Current - 2
+
+Scheduler assign a worker node to those containers.
+
+ie etcd is used as the key-value (KV) store to store the state of the entire Kubernetes cluster.
+
+CRI (Container Runtime Interface)
+it can be a Docker Engine, Containerd, Podman, Firecracker (AWS Lambda)
+
+
+Kubernetes use containerd runtime Interface.
+
+Worker Node -> Kublet, Kube Proxy, CRI (Inside CRI POD run one container sometimes multiple container)
+
+CCM (Cloud Control Manager)
+Let say start 10 containers of Nginx and create a loadbalancer for them.
+
+
+Kubernetes run containers but not loadbalancer. It is a resource.
+In it Kubernetes get loadbalancer instruction via (API Server) and forward it to CCM.
+
+This CCM can connect with AWS, Digtal Ocean, GCP and many more cloud platforms.
